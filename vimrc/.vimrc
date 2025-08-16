@@ -38,6 +38,19 @@ set cursorline
 nnoremap <leader><Tab> :bnext<CR>
 nnoremap <leader><S-Tab> :bprev<CR>
 
+" Language input toggle. Using <leader><Space> based on Windows' Win+Space key
+" In my case, it's Vietnamese. Update to your language or add new
+nnoremap <leader><Space> :call ToggleLanguageKeyMap()<CR>
+inoremap <leader><Space> <C-O>:call ToggleLanguageKeyMap()<CR>
+
+let g:keymaps = ['', 'vietnamese-telex_utf-8']
+let g:keymap_index=0
+function! ToggleLanguageKeyMap()
+    let g:keymap_index = (g:keymap_index + 1) % len(g:keymaps)
+    let new_keymap = g:keymaps[g:keymap_index]
+    execute 'set keymap=' . new_keymap
+endfunction
+
 "
 " --- Plugin Manager (vim-plug) Setup ---
 call plug#begin('~/.vim/plugged')
@@ -73,6 +86,9 @@ Plug 'mhinz/vim-signify'
 " Github copilot
 " Plug 'github/copilot.vim'
 Plug 'DanBradbury/copilot-chat.vim'
+
+" For non-Latin
+Plug 'rlue/vim-barbaric'
 
 " Icon theme, should be the last one
 Plug 'ryanoasis/vim-devicons'
