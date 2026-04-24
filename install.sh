@@ -97,7 +97,7 @@ install_vim_plugin_and_config() {
 
     # Install latest fzf, just in case user doesn't have permission to install
     cd ~/.vim/plugged/fzf
-    sudo ./install --test
+    sudo ./install
     cd -
     # Install ripgrep and fd-find for search
     # @TODO Find a better solution for other UNIX system
