@@ -83,12 +83,12 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-fugitive'
 Plug 'mhinz/vim-signify'
 
-" Github copilot
-" Plug 'github/copilot.vim'
-Plug 'DanBradbury/copilot-chat.vim'
-
 " For non-Latin
 Plug 'rlue/vim-barbaric'
+
+" copilot-chat-begin (managed by install.sh / uninstall.sh)
+Plug 'DanBradbury/copilot-chat.vim'
+" copilot-chat-end
 
 " Icon theme, should be the last one
 Plug 'ryanoasis/vim-devicons'
@@ -139,13 +139,15 @@ augroup fern_config
   autocmd FileType fern nnoremap <buffer> <leader>D <Plug>(fern-action-remove)
 augroup END
 
-" CopilotChat View settings
-augroup  copilot_chat_config
+" copilot-chat-begin (managed by install.sh / uninstall.sh)
+" Github copilot - CopilotChat View settings
+augroup copilot_chat_config
     autocmd!
     autocmd FileType copilot_chat setlocal number
     autocmd FileType copilot_chat setlocal winfixbuf "no update buffer for copilot chat window
     autocmd FileType copilot_chat vertical resize 60 "don't let it take space of our main editor window
 augroup END
+" copilot-chat-end
 
 "Search settings
 

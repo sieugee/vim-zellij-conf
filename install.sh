@@ -3,7 +3,22 @@ set -e
 
 # Global variable
 test_context=false
+with_copilot_chat=ask  # one of: ask | true | false
 SCRIPT_DIR=$(dirname "$0")
+
+# Ask a yes/no question; returns 0 for yes, 1 for no. Default is no.
+ask_yes_no() {
+    local prompt="$1"
+    local response
+    while true; do
+        read -r -p "$prompt [y/N]: " response
+        case "$response" in
+            [yY]|[yY][eE][sS]) return 0 ;;
+            [nN]|[nN][oO]|"") return 1 ;;
+            *) echo "Please answer yes or no." ;;
+        esac
+    done
+}
 
 # Function to parse command line arguments
 parse_args() {
@@ -12,6 +27,16 @@ parse_args() {
             --test)
                 test_context=true
                 echo "Test mode enabled - config from local script"
+                shift
+                ;;
+            --with-copilot-chat)
+                with_copilot_chat=true
+                echo "copilot-chat.vim will be installed (no prompt)"
+                shift
+                ;;
+            --no-copilot-chat)
+                with_copilot_chat=false
+                echo "copilot-chat.vim will NOT be installed (no prompt)"
                 shift
                 ;;
             *)
@@ -86,12 +111,27 @@ install_vim_plugin_and_config() {
 
     # Copy vimrc
     local test_config_from_local=${1:-false}
+    local copilot_chat=${2:-ask}
     if [[ "$test_config_from_local" != "true" ]]; then
         curl -fLo ~/.vimrc \
             https://raw.githubusercontent.com/sieugee/vim-zellij-conf/master/vimrc/.vimrc
     else
         cp -f "$SCRIPT_DIR/vimrc/.vimrc" ~/.vimrc
     fi
+
+    # Decide whether to keep copilot-chat.vim in the freshly-copied vimrc
+    if [[ "$copilot_chat" == "ask" ]]; then
+        if ask_yes_no "Install copilot-chat.vim plugin?"; then
+            copilot_chat=true
+        else
+            copilot_chat=false
+        fi
+    fi
+    if [[ "$copilot_chat" != "true" ]]; then
+        echo "Removing copilot-chat.vim block from ~/.vimrc"
+        sed -i '/^" copilot-chat-begin/,/^" copilot-chat-end/d' ~/.vimrc
+    fi
+
     vim +PlugInstall +qall
     vim +PlugClean +qall
 
@@ -151,6 +191,6 @@ install_zellij_plugin_and_config() {
 # MAIN
 parse_args "$@"
 download_and_install_vim
-install_vim_plugin_and_config "$test_context"
+install_vim_plugin_and_config "$test_context" "$with_copilot_chat"
 download_and_install_zellij
 install_zellij_plugin_and_config "$test_context"

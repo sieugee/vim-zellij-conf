@@ -78,6 +78,37 @@ uninstall_vim9() {
     fi
 }
 
+# Remove copilot-chat.vim plugin and its config block from ~/.vimrc
+uninstall_copilot_chat() {
+    echo "=============copilot-chat.vim Uninstall====================="
+
+    if [[ ! -f ~/.vimrc ]]; then
+        echo "~/.vimrc not found. Skipping."
+        return
+    fi
+    if ! grep -q '^" copilot-chat-begin' ~/.vimrc; then
+        echo "copilot-chat.vim block not found in ~/.vimrc. Skipping."
+        return
+    fi
+
+    if ! ask_yes_no "Do you want to remove copilot-chat.vim from your vimrc?"; then
+        echo "Skipping copilot-chat.vim removal."
+        return
+    fi
+
+    sed -i '/^" copilot-chat-begin/,/^" copilot-chat-end/d' ~/.vimrc
+    echo "Removed copilot-chat.vim block from ~/.vimrc."
+
+    if command -v vim >/dev/null 2>&1 && [[ -f ~/.vim/autoload/plug.vim ]]; then
+        echo "Running PlugClean to remove plugin files..."
+        vim '+PlugClean!' +qall || \
+            echo "PlugClean failed; you may need to manually remove ~/.vim/plugged/copilot-chat.vim"
+    elif [[ -d ~/.vim/plugged/copilot-chat.vim ]]; then
+        rm -rf ~/.vim/plugged/copilot-chat.vim
+        echo "Removed ~/.vim/plugged/copilot-chat.vim"
+    fi
+}
+
 # Remove zellij installed by install.sh
 uninstall_zellij() {
     echo "=============Zellij Uninstall====================="
@@ -107,6 +138,8 @@ echo "This will ask you one by one which components to remove."
 echo ""
 
 uninstall_vim9
+echo ""
+uninstall_copilot_chat
 echo ""
 uninstall_zellij
 
