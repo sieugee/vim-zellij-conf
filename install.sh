@@ -119,11 +119,20 @@ install_vim_plugin_and_config() {
         sudo ln -s "$(which fdfind)" /usr/local/bin/fd
     fi
 
-    # Add gitignore global for .swp file
-    echo "*.swp" >> ~/.gitignore_global
+    # Add gitignore global for vim swap files (https://github.com/github/gitignore/blob/main/Global/Vim.gitignore)
+    if ! grep -qxF '# vim swap files' ~/.gitignore_global 2>/dev/null; then
+        cat >> ~/.gitignore_global <<'EOF'
+# vim swap files
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+EOF
+    fi
     git config --global core.excludesfile ~/.gitignore_global
     # Set basrc move type to vi
-    echo "set -o vi" >> ~/.bashrc
+    grep -qxF 'set -o vi' ~/.bashrc 2>/dev/null || echo "set -o vi" >> ~/.bashrc
     source ~/.bashrc
 }
 
