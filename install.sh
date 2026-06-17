@@ -143,7 +143,7 @@ install_vim_plugin_and_config() {
     # @TODO Find a better solution for other UNIX system
     SEARCH_APT_PKGS=("ripgrep" "fd-find")
     missing_pkg=false
-    for pkg in "${REQUIRED_PKGS[@]}"; do
+    for pkg in "${SEARCH_APT_PKGS[@]}"; do
         if ! apt list --installed 2>/dev/null | grep -q "$pkg"; then
             missing_pkg=true
             break
@@ -151,7 +151,7 @@ install_vim_plugin_and_config() {
     done
     if $missing_pkg; then
         sudo apt update
-        sudo apt install -y "${REQUIRED_PKGS[@]}"
+        sudo apt install -y "${SEARCH_APT_PKGS[@]}"
     fi
     if [[ -f /usr/local/bin/fd ]]; then
         echo "/usr/local/bin/fd already exists and is assumed to be mapped to fdfind."

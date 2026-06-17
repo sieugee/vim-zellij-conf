@@ -51,6 +51,22 @@ function! ToggleLanguageKeyMap()
     execute 'set keymap=' . new_keymap
 endfunction
 
+" Buffer lock functionality to replace winfixbuf for older Vim versions
+let g:locked_windows = {}
+
+function! LockCurrentWindow()
+  let g:locked_windows[win_getid()] = bufnr('%')
+endfunction
+
+function! CheckWindowLock()
+  let winid = win_getid()
+  if has_key(g:locked_windows, winid)
+    if bufnr('%') != g:locked_windows[winid]
+      exe 'b' g:locked_windows[winid]
+    endif
+  endif
+endfunction
+
 "
 " --- Plugin Manager (vim-plug) Setup ---
 call plug#begin('~/.vim/plugged')
@@ -94,6 +110,9 @@ Plug 'DanBradbury/copilot-chat.vim'
 Plug 'ryanoasis/vim-devicons'
 call plug#end()
 
+" Add global BufEnter autocmd for buffer lock checking
+autocmd BufEnter * call CheckWindowLock()
+
 " fzf settings
 "set wildignore+=*/.git/*
 let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --follow --exclude .git'
@@ -134,7 +153,7 @@ vnoremap <leader>y y:call system('clip.exe', @")<CR>
 augroup fern_config
   autocmd!
   autocmd FileType fern setlocal nonumber norelativenumber "no line number on fern
-  autocmd FileType fern setlocal winfixbuf "no update buffer for fern window
+  autocmd FileType fern call LockCurrentWindow()
   " Remove file using \D
   autocmd FileType fern nnoremap <buffer> <leader>D <Plug>(fern-action-remove)
 augroup END
@@ -144,7 +163,7 @@ augroup END
 augroup copilot_chat_config
     autocmd!
     autocmd FileType copilot_chat setlocal number
-    autocmd FileType copilot_chat setlocal winfixbuf "no update buffer for copilot chat window
+    autocmd FileType copilot_chat call LockCurrentWindow()
     autocmd FileType copilot_chat vertical resize 60 "don't let it take space of our main editor window
 augroup END
 " copilot-chat-end
